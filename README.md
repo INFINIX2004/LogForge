@@ -1,125 +1,193 @@
-# LogForge
+# 🔨 LogForge
 
-A high-performance distributed logging system built with modern technologies for real-time log collection, processing, and analysis.
+**LogForge** is a distributed log aggregation and analytics system built for high-throughput applications.  
+It ingests logs via HTTP, buffers them safely using Redis Streams, processes them in batches, stores them efficiently in ClickHouse, and exposes real-time analytics through a web dashboard.
 
-## Architecture
+This project demonstrates real-world system design concepts such as asynchronous ingestion, batching, fault tolerance, and scalable analytics.
 
-LogForge consists of 6 microservices working together:
+---
 
-- **Collector** - Receives and queues log entries via HTTP API
-- **Processor** - Processes logs from queue and stores in ClickHouse
-- **API** - FastAPI backend for querying and retrieving logs
-- **Frontend** - React dashboard for log visualization and filtering
-- **ClickHouse** - High-performance columnar database for log storage
-- **Redis** - Message queue for reliable log processing
+## ✨ Features
 
-## Features
+- 🚀 High-throughput log ingestion via HTTP
+- 🧵 Redis Streams–based buffering (backpressure friendly)
+- 📦 Batch processing for efficient storage
+- 🏎️ ClickHouse for fast analytical queries
+- 📊 Real-time dashboard with filtering & charts
+- 🔍 Filter logs by service, level, message, and time range
+- ⏱️ Automatic log retention using ClickHouse TTL
+- 🐳 Fully Dockerized setup
 
-- Real-time log ingestion and processing
-- High-performance analytics with ClickHouse
-- Interactive web dashboard with filtering and charts
-- Anomaly detection capabilities
-- Docker containerized deployment
-- Scalable microservices architecture
+---
 
-## Quick Start
+## 🧠 Architecture Overview
 
-### Prerequisites
-- Docker and Docker Compose
-- Python 3.8+ (for development)
-
-### Run with Docker
-
-```bash
-# Clone the repository
-git clone https://github.com/INFINIX2004/LogForge.git
-cd LogForge
-
-# Start all services
-docker-compose up -d
-
-# Check service status
-docker-compose ps
+```
+Client / Services
+|
+v
+HTTP Collector
+|
+v
+Redis Streams
+|
+v
+Processor
+|
+v
+ClickHouse
+|
+v
+API + Frontend
 ```
 
-### Access Points
+### Component Roles
 
-- **Frontend Dashboard**: http://localhost:3000
-- **API Documentation**: http://localhost:8000/docs
-- **Log Collector**: http://localhost:8080
-- **ClickHouse**: http://localhost:8123
+| Component   | Responsibility |
+|------------|----------------|
+| Collector  | Receives logs over HTTP |
+| Redis      | Buffers logs using streams |
+| Processor  | Normalizes & batches logs |
+| ClickHouse | Stores logs & runs analytics |
+| API        | Queries logs & statistics |
+| Frontend  | Displays logs and charts |
 
-## API Usage
+---
 
-### Send Logs
+## 🛠️ Tech Stack
+
+- **Backend**: Python, FastAPI
+- **Queue**: Redis Streams
+- **Database**: ClickHouse
+- **Frontend**: React (Vite)
+- **Containerization**: Docker & Docker Compose
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Clone the repository
+```bash
+git clone https://github.com/INFINIX2004/LogForge.git
+cd LogForge
+```
+
+### Start the system
+
+```bash
+docker-compose up --build
+```
+
+Services will be available at:
+
+* **Collector**: [http://localhost:8080](http://localhost:8080)
+* **API**: [http://localhost:8000](http://localhost:8000)
+* **Dashboard**: [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 📤 Sending Logs
+
+### Example log request
+
 ```bash
 curl -X POST http://localhost:8080/logs \
   -H "Content-Type: application/json" \
   -d '{
-    "timestamp": "2024-01-01T12:00:00Z",
-    "level": "INFO",
-    "message": "Application started",
-    "service": "web-server"
+    "level": "ERROR",
+    "service": "payment-api",
+    "message": "Payment failed",
+    "trace_id": "trace-123",
+    "user_id": "user-42"
   }'
 ```
 
-### Query Logs
-```bash
-curl "http://localhost:8000/logs?limit=100&level=ERROR"
-```
+---
 
-## Development
+## 🧪 Load Testing
 
-### Local Setup
-```bash
-# Install dependencies for each service
-cd collector && pip install -r requirements.txt
-cd ../processor && pip install -r requirements.txt
-cd ../api && pip install -r requirements.txt
-cd ../anomaly_detector && pip install -r requirements.txt
+A log generator is included to simulate real traffic.
 
-# Frontend setup
-cd frontend
-npm install
-npm run dev
-```
-
-### Generate Test Data
 ```bash
 python scripts/generate_logs.py
 ```
 
-## Services
+This can generate hundreds of logs per second and demonstrate system scalability.
 
-### Collector (Port 8080)
-- Receives HTTP POST requests with log data
-- Validates and queues logs in Redis
-- Built with Python/FastAPI
+---
 
-### Processor
-- Consumes logs from Redis queue
-- Processes and stores in ClickHouse
-- Handles batch processing for performance
+## 📊 Dashboard Features
 
-### API (Port 8000)
-- FastAPI backend for log queries
-- Supports filtering by time, level, service
-- Provides aggregation endpoints
+* Live log stream
+* Error / Warning / Info charts
+* Service-based filtering
+* Full-text search on messages
+* Time-range filtering
 
-### Frontend (Port 3000)
-- React dashboard with Vite
-- Real-time log visualization
-- Interactive filtering and charts
-- Built with Recharts for analytics
+---
 
-## Configuration
+## 🗄️ Data Retention
 
-Environment variables can be configured in `docker-compose.yml`:
+Logs are automatically expired at the database level using ClickHouse TTL:
 
-- `REDIS_URL` - Redis connection string
-- `CLICKHOUSE_HOST` - ClickHouse server host
-- `CLICKHOUSE_PORT` - ClickHouse server port
+```sql
+TTL toDateTime(timestamp) + INTERVAL 30 DAY
+```
 
-## License
+No cron jobs or manual cleanup required.
+
+---
+
+## 🔒 Design Decisions
+
+* **Redis Streams** were chosen for durability and consumer control
+* **Batch writes** reduce ClickHouse insert overhead
+* **Strict schema** ensures data consistency
+* **Processor normalization** prevents invalid data from reaching storage
+
+---
+
+## 📈 Performance Notes
+
+* Handles 100+ logs/sec on a local setup
+* Queries return in milliseconds for thousands of logs
+* Designed to scale horizontally
+
+---
+
+## 🧩 Future Enhancements
+
+* Alerting on error spikes
+* Trace-ID based log correlation
+* Authentication & multi-tenant support
+* Grafana integration
+* Horizontal processor scaling
+
+---
+
+## 🎓 Learning Outcomes
+
+This project demonstrates:
+
+* Distributed system design
+* Event-driven architectures
+* Data normalization & validation
+* Debugging real production-style issues
+* Observability pipelines
+
+---
+
+## 📄 License
 
 MIT License
+
+---
+
+## 🙌 Author
+
+Built by **INFINIX2004**
+For learning, experimentation, and real-world system design practice.
