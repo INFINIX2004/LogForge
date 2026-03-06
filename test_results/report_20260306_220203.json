@@ -1,0 +1,90 @@
+{
+  "run_timestamp": "2026-03-06T16:32:03.362275+00:00",
+  "config": {
+    "baseline_cycles": 45,
+    "scenario_cycles": 12,
+    "cycle_delay_s": 6,
+    "collector_url": "http://localhost:8080/logs",
+    "api_url": "http://localhost:8000/api"
+  },
+  "summary": {
+    "total_scenarios": 6,
+    "passed": 6,
+    "missed": 0,
+    "detection_rate": 100.0
+  },
+  "scenarios": [
+    {
+      "scenario": "Error Spike",
+      "target_service": "payment-api",
+      "description": "Gradual ramp from 5% to 80% error rate \u2014 DB failure",
+      "detected": true,
+      "cycles_to_detect": 2,
+      "total_cycles": 12,
+      "detection_count": 19,
+      "avg_confidence": 50.6,
+      "max_confidence": 96.5,
+      "scenario_start": "2026-03-06T15:47:25.438953+00:00"
+    },
+    {
+      "scenario": "Service Silence",
+      "target_service": "auth-service",
+      "description": "auth-service goes completely silent \u2014 crash/partition",
+      "detected": true,
+      "cycles_to_detect": 2,
+      "total_cycles": 12,
+      "detection_count": 4,
+      "avg_confidence": 62.0,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-06T15:55:38.550877+00:00"
+    },
+    {
+      "scenario": "Error Ratio Explosion",
+      "target_service": "inventory",
+      "description": "50% of inventory requests failing \u2014 warehouse API down",
+      "detected": true,
+      "cycles_to_detect": 2,
+      "total_cycles": 12,
+      "detection_count": 1,
+      "avg_confidence": 100.0,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-06T16:03:50.254179+00:00"
+    },
+    {
+      "scenario": "Volume Storm",
+      "target_service": "notification",
+      "description": "10x normal volume, normal error rate \u2014 retry loop",
+      "detected": true,
+      "cycles_to_detect": 1,
+      "total_cycles": 12,
+      "detection_count": 1,
+      "avg_confidence": 100.0,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-06T16:12:02.819342+00:00"
+    },
+    {
+      "scenario": "Slow Degradation",
+      "target_service": "payment-api",
+      "description": "Errors creep 5%\u219240% over time \u2014 memory leak pattern",
+      "detected": true,
+      "cycles_to_detect": 5,
+      "total_cycles": 12,
+      "detection_count": 1,
+      "avg_confidence": 100.0,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-06T16:20:19.393153+00:00"
+    },
+    {
+      "scenario": "Cascading Failure",
+      "target_service": "payment-api",
+      "description": "payment-api fails, auth + inventory degrade 2-3 cycles later",
+      "detected": true,
+      "cycles_to_detect": 1,
+      "total_cycles": 12,
+      "detection_count": 13,
+      "avg_confidence": 87.2,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-06T16:28:32.418124+00:00"
+    }
+  ]
+}
