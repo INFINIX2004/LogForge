@@ -1,3 +1,5 @@
+# PROCESSOR
+
 import redis
 import clickhouse_connect
 import json
@@ -10,7 +12,6 @@ redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379'))
 
 # Wait for ClickHouse to be ready
 def wait_for_clickhouse(max_retries=30):
-    """Wait for ClickHouse to be ready before connecting"""
     for i in range(max_retries):
         try:
             print(f"Attempting to connect to ClickHouse (attempt {i+1}/{max_retries})...")
@@ -19,14 +20,15 @@ def wait_for_clickhouse(max_retries=30):
                 port=int(os.getenv('CLICKHOUSE_PORT', 8123)),
                 database='logs'
             )
-            print("✓ Connected to ClickHouse successfully!")
+            # Verify the table actually exists before proceeding
+            client.command("SELECT 1 FROM logs LIMIT 1")
+            print("✓ Connected to ClickHouse and table verified!")
             return client
         except Exception as e:
-            print(f"  ClickHouse not ready yet: {e}")
+            print(f"  Not ready yet: {e}")
             time.sleep(2)
-    
     raise Exception("Could not connect to ClickHouse after 30 retries")
-
+    
 # Initialize with retry
 ch_client = wait_for_clickhouse()
 
@@ -107,7 +109,7 @@ def prepare_row(log):
     )
 
 def flush_batch(batch):
-    """Write batch to ClickHouse"""
+
     try:
         ch_client.insert(
             'logs',
