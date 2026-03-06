@@ -1,3 +1,4 @@
+# API
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
@@ -143,7 +144,6 @@ def get_stats(
 
 @app.get("/api/services")
 def list_services():
-    """Get list of all services"""
     ch_client = get_clickhouse_client()
     result = ch_client.query("SELECT DISTINCT service FROM logs ORDER BY service")
     services = [row[0] for row in result.result_rows]
@@ -159,3 +159,77 @@ def health():
         return {"status": "healthy", "clickhouse": "ok"}
     except:
         return {"status": "unhealthy", "clickhouse": "down"}
+
+@app.get("/api/anomalies")
+def get_anomalies(
+    service: str = None,
+    hours: int = Query(24, le=168),
+    limit: int = Query(100, le=1000)
+):
+    ch_client = get_clickhouse_client()
+
+    conditions = ["detected_at >= now() - INTERVAL %(hours)s HOUR"]
+    params = {'hours': hours}
+
+    if service:
+        conditions.append("service = %(service)s")
+        params['service'] = service
+
+    where_clause = " AND ".join(conditions)
+
+    result = ch_client.query(f"""
+        SELECT
+            detected_at, service, confidence, raw_score,
+            error_count, warn_count, total_logs, error_ratio, unique_hosts
+        FROM anomalies
+        WHERE {where_clause}
+        ORDER BY detected_at DESC
+        LIMIT {limit}
+    """, parameters=params)
+
+    anomalies = []
+    for row in result.result_rows:
+        anomalies.append({
+            "detected_at": row[0].isoformat(),
+            "service":     row[1],
+            "confidence":  row[2],
+            "raw_score":   row[3],
+            "error_count": row[4],
+            "warn_count":  row[5],
+            "total_logs":  row[6],
+            "error_ratio": row[7],
+            "unique_hosts":row[8]
+        })
+
+    ch_client.close()
+    return {"total": len(anomalies), "anomalies": anomalies}
+
+
+@app.get("/api/anomaly-stats")
+def get_anomaly_stats(hours: int = Query(24, le=168)):
+
+    ch_client = get_clickhouse_client()
+
+    result = ch_client.query("""
+        SELECT
+            toStartOfHour(detected_at) AS hour,
+            service,
+            count()                    AS anomaly_count,
+            avg(confidence)            AS avg_confidence
+        FROM anomalies
+        WHERE detected_at >= now() - INTERVAL %(hours)s HOUR
+        GROUP BY hour, service
+        ORDER BY hour DESC
+    """, parameters={'hours': hours})
+
+    stats = []
+    for row in result.result_rows:
+        stats.append({
+            "hour":           row[0].isoformat(),
+            "service":        row[1],
+            "anomaly_count":  row[2],
+            "avg_confidence": round(row[3], 1)
+        })
+
+    ch_client.close()
+    return {"stats": stats}
