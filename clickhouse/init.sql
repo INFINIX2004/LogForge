@@ -16,5 +16,22 @@ CREATE TABLE IF NOT EXISTS logs.logs (
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(timestamp)
 ORDER BY (service, level, timestamp)
-TTL timestamp + INTERVAL 30 DAY
+TTL toDateTime(timestamp) + INTERVAL 30 DAY
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE IF NOT EXISTS logs.anomalies (
+    detected_at   DateTime64(3),
+    service       LowCardinality(String),
+    confidence    Float32,
+    raw_score     Float32,
+    error_count   Int32,
+    warn_count    Int32,
+    total_logs    Int32,
+    error_ratio   Float32,
+    unique_hosts  Int32
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMMDD(detected_at)
+ORDER BY (service, detected_at)
+TTL toDateTime(detected_at) + INTERVAL 30 DAY
 SETTINGS index_granularity = 8192;
