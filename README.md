@@ -1,9 +1,9 @@
 # 🔨 LogForge
 
 **LogForge** is a distributed log aggregation and analytics system built for high-throughput applications.  
-It ingests logs via HTTP, buffers them safely using Redis Streams, processes them in batches, stores them efficiently in ClickHouse, and exposes real-time analytics through a web dashboard.
+It ingests logs via HTTP, buffers them safely using Redis Streams, processes them in batches, stores them efficiently in ClickHouse, and exposes real-time analytics through a web dashboard with **ML-powered anomaly detection**.
 
-This project demonstrates real-world system design concepts such as asynchronous ingestion, batching, fault tolerance, and scalable analytics.
+This project demonstrates real-world system design concepts such as asynchronous ingestion, batching, fault tolerance, scalable analytics, and intelligent monitoring.
 
 ---
 
@@ -16,6 +16,10 @@ This project demonstrates real-world system design concepts such as asynchronous
 - 📊 Real-time dashboard with filtering & charts
 - 🔍 Filter logs by service, level, message, and time range
 - ⏱️ Automatic log retention using ClickHouse TTL
+- 🤖 **ML-based anomaly detection** using Isolation Forest
+- 🎯 **Seasonal pattern learning** for hour-based anomaly scoring
+- 🔔 **Real-time anomaly alerts** with confidence scoring
+- 📈 **Anomaly dashboard** with historical trends
 - 🐳 Fully Dockerized setup
 
 ---
@@ -36,9 +40,12 @@ Processor
 |
 v
 ClickHouse
-|
-v
-API + Frontend
+|         \
+v          v
+API    Anomaly Detector
+|          |
+v          v
+Frontend (Logs + Anomalies)
 ```
 
 ### Component Roles
@@ -49,8 +56,9 @@ API + Frontend
 | Redis      | Buffers logs using streams |
 | Processor  | Normalizes & batches logs |
 | ClickHouse | Stores logs & runs analytics |
-| API        | Queries logs & statistics |
-| Frontend  | Displays logs and charts |
+| Anomaly Detector | ML-based anomaly detection with seasonal models |
+| API        | Queries logs, statistics & anomalies |
+| Frontend  | Displays logs, charts & anomaly alerts |
 
 ---
 
@@ -59,6 +67,7 @@ API + Frontend
 - **Backend**: Python, FastAPI
 - **Queue**: Redis Streams
 - **Database**: ClickHouse
+- **ML**: scikit-learn (Isolation Forest)
 - **Frontend**: React (Vite)
 - **Containerization**: Docker & Docker Compose
 
@@ -118,15 +127,42 @@ python scripts/generate_logs.py
 
 This can generate hundreds of logs per second and demonstrate system scalability.
 
+### Anomaly Detection Testing
+
+A comprehensive simulation test suite is available to validate anomaly detection:
+
+```bash
+python scripts/simulation_tests.py
+```
+
+This runs multiple scenarios including:
+- Error spikes and bursts
+- Volume storms
+- Slow degradation patterns
+- Cascading failures
+- Service silence detection
+
+Test results are saved to `test_results/` with detailed reports on detection accuracy and confidence scores.
+
 ---
 
 ## 📊 Dashboard Features
 
-* Live log stream
-* Error / Warning / Info charts
-* Service-based filtering
-* Full-text search on messages
-* Time-range filtering
+### Log Viewer
+- Live log stream with auto-refresh
+- Service-based filtering
+- Log level filtering (ERROR, WARN, INFO)
+- Full-text search on messages
+- Time-range filtering
+- Error/Warning/Info distribution charts
+
+### Anomaly Detection Panel
+- Real-time anomaly alerts with confidence scores
+- Per-service anomaly tracking
+- Historical anomaly trends
+- Feature breakdown (error count, burst patterns, message entropy)
+- Hourly anomaly statistics
+- Seasonal pattern visualization
 
 ---
 
@@ -148,6 +184,10 @@ No cron jobs or manual cleanup required.
 * **Batch writes** reduce ClickHouse insert overhead
 * **Strict schema** ensures data consistency
 * **Processor normalization** prevents invalid data from reaching storage
+* **Isolation Forest ML** detects anomalies without labeled training data
+* **Seasonal models** learn hour-specific patterns to reduce false positives
+* **Feature engineering** includes error bursts and message entropy for better detection
+* **Persistent model storage** allows anomaly detection to resume after restarts
 
 ---
 
@@ -161,11 +201,12 @@ No cron jobs or manual cleanup required.
 
 ## 🧩 Future Enhancements
 
-* Alerting on error spikes
+* Advanced alerting on error spikes (Slack/Email integration)
 * Trace-ID based log correlation
 * Authentication & multi-tenant support
 * Grafana integration
 * Horizontal processor scaling
+* Custom anomaly thresholds per service
 
 ---
 
@@ -176,6 +217,9 @@ This project demonstrates:
 * Distributed system design
 * Event-driven architectures
 * Data normalization & validation
+* Machine learning for anomaly detection
+* Time-series pattern recognition
+* Real-time monitoring and alerting
 * Debugging real production-style issues
 * Observability pipelines
 
