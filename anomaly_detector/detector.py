@@ -20,7 +20,7 @@ MIN_DATAPOINTS     = 20      # minimum history before a model trains
 MAX_HISTORY        = 1440    # rolling window: 1440 min = 24 hours
 RETRAIN_EVERY      = 60      # retrain every N cycles
 BOOTSTRAP_HOURS    = 24      # how many hours of history to load on startup
-
+MIN_CONFIDENCE   = 25.0     # minimum confidence % to trigger alert
 MODEL_DIR          = os.getenv('MODEL_DIR', '/app/models')
 
 # Feature names — used in alerts so you know what each number means
@@ -245,7 +245,7 @@ def compute_contamination(service: str) -> float:
         return 0.02  # very quiet service — be sensitive
 
     cv = std / mean  # coefficient of variation
-    contamination = float(np.clip(cv * 0.1, 0.01, 0.15))
+    contamination = float(np.clip(cv * 0.05, 0.01, 0.05))
     return round(contamination, 4)
 
 
@@ -326,10 +326,11 @@ def score_and_alert(service: str, feature_vector: list, client):
 
     model_used = 'seasonal' if (seasonal and raw_score == scores[0]) else 'global'
 
-    if prediction == -1:
+    MIN_CONFIDENCE = 25.0  # ignore alerts below this threshold
+
+    if prediction == -1 and confidence >= MIN_CONFIDENCE:
         alert(service, feature_vector, raw_score, confidence, model_used)
         write_anomaly_to_db(client, service, feature_vector, raw_score, confidence)
-
 
 # ─────────────────────────────────────────────
 # ALERT

@@ -81,15 +81,26 @@ services:
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
 
-  frontend:
-    build: ./frontend
-    container_name: log_frontend
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: log_grafana
     ports:
-      - "3000:80"
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
-      - api
+      clickhouse:
+        condition: service_healthy
 
 volumes:
   clickhouse_data:
   redis_data:
   anomaly_models:
+  grafana_data:

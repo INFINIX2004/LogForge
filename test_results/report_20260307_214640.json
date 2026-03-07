@@ -1,5 +1,5 @@
 {
-  "run_timestamp": "2026-03-06T16:32:03.362275+00:00",
+  "run_timestamp": "2026-03-07T16:16:40.489639+00:00",
   "config": {
     "baseline_cycles": 45,
     "scenario_cycles": 12,
@@ -19,12 +19,12 @@
       "target_service": "payment-api",
       "description": "Gradual ramp from 5% to 80% error rate \u2014 DB failure",
       "detected": true,
-      "cycles_to_detect": 2,
+      "cycles_to_detect": 1,
       "total_cycles": 12,
-      "detection_count": 19,
-      "avg_confidence": 50.6,
-      "max_confidence": 96.5,
-      "scenario_start": "2026-03-06T15:47:25.438953+00:00"
+      "detection_count": 11,
+      "avg_confidence": 46.6,
+      "max_confidence": 100.0,
+      "scenario_start": "2026-03-07T15:31:43.000057+00:00"
     },
     {
       "scenario": "Service Silence",
@@ -34,21 +34,21 @@
       "cycles_to_detect": 2,
       "total_cycles": 12,
       "detection_count": 4,
-      "avg_confidence": 62.0,
+      "avg_confidence": 36.6,
       "max_confidence": 100.0,
-      "scenario_start": "2026-03-06T15:55:38.550877+00:00"
+      "scenario_start": "2026-03-07T15:39:58.622546+00:00"
     },
     {
       "scenario": "Error Ratio Explosion",
       "target_service": "inventory",
       "description": "50% of inventory requests failing \u2014 warehouse API down",
       "detected": true,
-      "cycles_to_detect": 2,
+      "cycles_to_detect": 1,
       "total_cycles": 12,
-      "detection_count": 1,
-      "avg_confidence": 100.0,
+      "detection_count": 12,
+      "avg_confidence": 76.2,
       "max_confidence": 100.0,
-      "scenario_start": "2026-03-06T16:03:50.254179+00:00"
+      "scenario_start": "2026-03-07T15:48:16.110860+00:00"
     },
     {
       "scenario": "Volume Storm",
@@ -57,10 +57,10 @@
       "detected": true,
       "cycles_to_detect": 1,
       "total_cycles": 12,
-      "detection_count": 1,
-      "avg_confidence": 100.0,
+      "detection_count": 8,
+      "avg_confidence": 73.3,
       "max_confidence": 100.0,
-      "scenario_start": "2026-03-06T16:12:02.819342+00:00"
+      "scenario_start": "2026-03-07T15:56:31.019609+00:00"
     },
     {
       "scenario": "Slow Degradation",
@@ -69,10 +69,10 @@
       "detected": true,
       "cycles_to_detect": 5,
       "total_cycles": 12,
-      "detection_count": 1,
-      "avg_confidence": 100.0,
-      "max_confidence": 100.0,
-      "scenario_start": "2026-03-06T16:20:19.393153+00:00"
+      "detection_count": 9,
+      "avg_confidence": 57.4,
+      "max_confidence": 81.1,
+      "scenario_start": "2026-03-07T16:04:51.497437+00:00"
     },
     {
       "scenario": "Cascading Failure",
@@ -81,10 +81,10 @@
       "detected": true,
       "cycles_to_detect": 1,
       "total_cycles": 12,
-      "detection_count": 13,
-      "avg_confidence": 87.2,
-      "max_confidence": 100.0,
-      "scenario_start": "2026-03-06T16:28:32.418124+00:00"
+      "detection_count": 20,
+      "avg_confidence": 57.5,
+      "max_confidence": 90.4,
+      "scenario_start": "2026-03-07T16:13:09.061643+00:00"
     }
   ]
 }

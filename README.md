@@ -68,7 +68,7 @@ Frontend (Logs + Anomalies)
 - **Queue**: Redis Streams
 - **Database**: ClickHouse
 - **ML**: scikit-learn (Isolation Forest)
-- **Frontend**: React (Vite)
+- **Visualization**: Grafana
 - **Containerization**: Docker & Docker Compose
 
 ---
@@ -95,7 +95,7 @@ Services will be available at:
 
 * **Collector**: [http://localhost:8080](http://localhost:8080)
 * **API**: [http://localhost:8000](http://localhost:8000)
-* **Dashboard**: [http://localhost:3000](http://localhost:3000)
+* **Grafana Dashboard**: [http://localhost:3000](http://localhost:3000)
 
 ---
 
@@ -129,7 +129,7 @@ This can generate hundreds of logs per second and demonstrate system scalability
 
 ### Anomaly Detection Testing
 
-A comprehensive simulation test suite is available to validate anomaly detection:
+A comprehensive simulation test suite validates anomaly detection accuracy:
 
 ```bash
 python scripts/simulation_tests.py
@@ -142,11 +142,26 @@ This runs multiple scenarios including:
 - Cascading failures
 - Service silence detection
 
-Test results are saved to `test_results/` with detailed reports on detection accuracy and confidence scores.
+**Latest Test Results** (100% detection rate):
+
+| Scenario | Detection | Cycles to Detect | Avg Confidence | Max Confidence |
+|----------|-----------|------------------|----------------|----------------|
+| Error Spike | ✅ | 1 | 46.6% | 100% |
+| Service Silence | ✅ | 2 | 36.6% | 100% |
+| Error Ratio Explosion | ✅ | 1 | 76.2% | 100% |
+| Volume Storm | ✅ | 1 | 73.3% | 100% |
+| Slow Degradation | ✅ | 5 | 57.4% | 81.1% |
+| Cascading Failure | ✅ | 1 | 57.5% | 90.4% |
+
+Test results are saved to `test_results/` with detailed reports and dashboard screenshots.
+
+![Anomaly Detection Dashboard](test_results/dash.png)
 
 ---
 
 ## 📊 Dashboard Features
+
+Access the Grafana dashboard at [http://localhost:3000](http://localhost:3000) (default credentials: admin/admin)
 
 ### Log Viewer
 - Live log stream with auto-refresh

@@ -1,0 +1,251 @@
+{
+  "title": "AI-Powered Log Observability Platform",
+  "uid": "log-observability",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "tags": ["logs", "anomaly", "ai"],
+  "panels": [
+
+    {
+      "id": 1,
+      "title": "📊 Log Volume Over Time (per service)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT toStartOfMinute(timestamp) AS time, service, count() AS volume FROM logs.logs WHERE $__timeFilter(timestamp) GROUP BY time, service ORDER BY time ASC",
+          "format": 0,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "title": "🔴 Error Rate Trends (% per service)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT toStartOfMinute(timestamp) AS time, service, round(countIf(level = 'ERROR') / count() * 100, 2) AS error_rate FROM logs.logs WHERE $__timeFilter(timestamp) GROUP BY time, service ORDER BY time ASC",
+          "format": 0,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 3,
+      "title": "⚠️ Anomaly Confidence Scores",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 16, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "spanNulls": false,
+            "drawStyle": "points",
+            "pointSize": 6
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "yellow", "value": null },
+              { "color": "orange", "value": 40 },
+              { "color": "red", "value": 75 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT detected_at AS time, service, confidence FROM logs.anomalies WHERE $__timeFilter(detected_at) ORDER BY detected_at ASC",
+          "format": 0,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 4,
+      "title": "🟢 Service Health (last 5 min)",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT service, if(count() > 0, 1, 0) AS is_up FROM logs.logs WHERE timestamp >= now() - INTERVAL 5 MINUTE GROUP BY service ORDER BY service",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 5,
+      "title": "📋 Top Error Messages",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "sortBy": [{ "displayName": "count", "desc": true }]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "count" },
+            "properties": [
+              { "id": "custom.width", "value": 80 },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "thresholds", "value": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "yellow", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              }}
+            ]
+          },
+          { "matcher": { "id": "byName", "options": "service" }, "properties": [{ "id": "custom.width", "value": 120 }] },
+          { "matcher": { "id": "byName", "options": "message" }, "properties": [{ "id": "custom.width", "value": 400 }] }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT service, message, count() AS count FROM logs.logs WHERE $__timeFilter(timestamp) AND level = 'ERROR' GROUP BY service, message ORDER BY count DESC LIMIT 20",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 6,
+      "title": "🔥 Incident Timeline — Cascading Failures",
+      "type": "table",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+      "options": {
+        "sortBy": [{ "displayName": "detected_at", "desc": true }]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "confidence" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              { "id": "custom.width", "value": 90 },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "thresholds", "value": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "yellow", "value": null },
+                  { "color": "orange", "value": 40 },
+                  { "color": "red", "value": 75 }
+                ]
+              }}
+            ]
+          },
+          { "matcher": { "id": "byName", "options": "service" }, "properties": [{ "id": "custom.width", "value": 130 }] },
+          { "matcher": { "id": "byName", "options": "detected_at" }, "properties": [{ "id": "custom.width", "value": 160 }] },
+          {
+            "matcher": { "id": "byName", "options": "incident_type" },
+            "properties": [
+              { "id": "custom.width", "value": 160 },
+              { "id": "custom.displayMode", "value": "color-text" },
+              { "id": "mappings", "value": [
+                { "type": "value", "options": {
+                  "volume_storm":    { "text": "🌊 Volume Storm",    "color": "blue" },
+                  "error_spike":     { "text": "🔴 Error Spike",     "color": "red" },
+                  "high_error_ratio":{ "text": "⚠️ High Error Ratio","color": "orange" },
+                  "silence":         { "text": "🔇 Service Silence", "color": "purple" },
+                  "anomaly":         { "text": "⚠️ Anomaly",         "color": "yellow" }
+                }}
+              ]}
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "clickhouse-uid" },
+          "rawSql": "SELECT detected_at, service, round(confidence, 1) AS confidence, error_count, warn_count, total_logs, round(error_ratio * 100, 1) AS error_pct, multiIf(total_logs > 50 AND error_ratio < 0.1, 'volume_storm', error_ratio > 0.4, 'error_spike', error_ratio > 0.15, 'high_error_ratio', total_logs = 0, 'silence', 'anomaly') AS incident_type FROM logs.anomalies WHERE $__timeFilter(detected_at) ORDER BY detected_at DESC LIMIT 100",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    }
+
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}
