@@ -1,0 +1,65 @@
+# Grafana — strip /grafana prefix, app handles subpath via GF_SERVER_ROOT_URL
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-grafana
+  namespace: log-system
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /grafana(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+---
+# API — no rewrite, app routes are /api/logs /api/stats etc
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-api
+  namespace: log-system
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 8000
+---
+# Collector — no rewrite, app route is /logs
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-collector
+  namespace: log-system
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /logs
+            pathType: Prefix
+            backend:
+              service:
+                name: collector
+                port:
+                  number: 8080

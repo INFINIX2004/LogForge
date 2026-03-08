@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anomaly-detector
+  namespace: log-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anomaly-detector
+  template:
+    metadata:
+      labels:
+        app: anomaly-detector
+    spec:
+      initContainers:
+        - name: wait-for-clickhouse
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until wget -qO- http://clickhouse:8123/ping; do
+                echo "Waiting for ClickHouse..."
+                sleep 3
+              done
+      containers:
+        - name: anomaly-detector
+          image: log-system-anomaly_detector:latest
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: log-system-config
+          volumeMounts:
+            - name: models
+              mountPath: /app/models
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: models-pvc

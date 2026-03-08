@@ -150,7 +150,7 @@ def list_services():
     ch_client.close()
     return {"services": services}
 
-@app.get("/health")
+@app.get("/api/health")
 def health():
     try:
         ch_client = get_clickhouse_client()

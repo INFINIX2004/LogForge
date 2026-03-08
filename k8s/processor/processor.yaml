@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor
+  namespace: log-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processor
+  template:
+    metadata:
+      labels:
+        app: processor
+    spec:
+      # Wait for clickhouse to be ready before starting
+      initContainers:
+        - name: wait-for-clickhouse
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until wget -qO- http://clickhouse:8123/ping; do
+                echo "Waiting for ClickHouse..."
+                sleep 3
+              done
+              echo "ClickHouse is ready!"
+      containers:
+        - name: processor
+          image: log-system-processor:latest
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: log-system-config
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
