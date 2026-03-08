@@ -1,5 +1,15 @@
 # Architecture
 
+## System Overview
+
+```
+HTTP → Collector → Redis Streams → Processor → ClickHouse
+                                                    ↓
+                                          Anomaly Detector (Isolation Forest)
+                                                    ↓
+                                                Grafana
+```
+
 ## Data Flow
 
 ```
@@ -53,10 +63,15 @@ TTL toDateTime(detected_at) + INTERVAL 30 DAY
 ## ML Pipeline
 
 Features extracted per service per 5-minute window:
-- `error_count`, `warn_count`, `total_logs`
-- `error_ratio` = errors / total
-- `unique_hosts` = number of distinct hosts
-- `error_burst` = max errors in any 1-minute sub-window
-- `message_entropy` = Shannon entropy of log messages (drops when same error repeats)
+
+| Feature | Description |
+|---------|-------------|
+| `error_count` | Total ERROR level logs |
+| `warn_count` | Total WARN level logs |
+| `total_logs` | Total log volume |
+| `error_ratio` | errors / total |
+| `unique_hosts` | Number of distinct hosts |
+| `error_burst` | Max errors in any 1-minute sub-window |
+| `message_entropy` | Shannon entropy of log messages (drops when same error repeats) |
 
 Contamination is dynamic: `clamp(cv * 0.05, 0.01, 0.05)` where cv = coefficient of variation of recent history.

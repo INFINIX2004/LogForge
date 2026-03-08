@@ -20,7 +20,15 @@ curl -X POST http://localhost:8080/logs \
   -d '{"level":"ERROR","service":"payment-api","message":"Payment failed","trace_id":"abc123","user_id":"user-42"}'
 ```
 
-**Fields:** `level` (ERROR/WARN/INFO), `service`, `message` — required. `trace_id`, `user_id` — optional.
+**Request Body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `level` | string | Yes | ERROR/WARN/INFO |
+| `service` | string | Yes | Service name |
+| `message` | string | Yes | Log message |
+| `trace_id` | string | No | Trace identifier |
+| `user_id` | string | No | User identifier |
 
 ### `GET /health`
 Returns `{"status":"healthy","redis_connected":true}`
@@ -32,17 +40,43 @@ Returns `{"status":"healthy","redis_connected":true}`
 ### `GET /logs`
 Query logs with filters.
 
-**Params:** `service`, `level`, `start_time`, `end_time`, `search`, `limit` (default 100), `offset`
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `service` | string | - | Filter by service name |
+| `level` | string | - | Filter by log level |
+| `start_time` | string | - | Start timestamp |
+| `end_time` | string | - | End timestamp |
+| `search` | string | - | Search in message |
+| `limit` | integer | 100 | Max results |
+| `offset` | integer | 0 | Pagination offset |
 
 ```bash
 curl "http://localhost:8000/logs?service=payment-api&level=ERROR&limit=50"
 ```
 
 ### `GET /stats`
-Aggregate statistics. **Params:** `service`, `start_time`, `end_time`
+Aggregate statistics.
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `service` | string | Filter by service name |
+| `start_time` | string | Start timestamp |
+| `end_time` | string | End timestamp |
 
 ### `GET /api/anomalies`
-Recent anomalies. **Params:** `service`, `hours` (default 1), `limit`
+Recent anomalies.
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `service` | string | - | Filter by service name |
+| `hours` | integer | 1 | Look back hours |
+| `limit` | integer | - | Max results |
 
 ### `GET /api/anomaly-stats`
 Per-service anomaly counts and average confidence.
@@ -54,5 +88,7 @@ Returns `{"status":"healthy"}`
 
 ## Swagger UI
 
-- Docker Compose: http://localhost:8000/docs
-- Kubernetes: http://localhost/api/docs
+| Environment | URL |
+|-------------|-----|
+| Docker Compose | http://localhost:8000/docs |
+| Kubernetes | http://localhost/api/docs |

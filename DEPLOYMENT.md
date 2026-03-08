@@ -8,7 +8,13 @@ docker-compose down          # stop (data persists)
 docker-compose down -v       # stop + wipe all data
 ```
 
-**Endpoints:** Collector `localhost:8080` · API `localhost:8000` · Grafana `localhost:3001`
+**Endpoints:**
+
+| Service | URL |
+|---------|-----|
+| Collector | http://localhost:8080 |
+| API | http://localhost:8000 |
+| Grafana | http://localhost:3001 |
 
 ---
 
@@ -34,7 +40,13 @@ chmod +x k8s/deploy.sh
 
 The deploy script handles everything: builds images, loads them into Kind (no internet required), installs ingress, and applies all manifests in the correct order.
 
-**Endpoints:** Grafana `localhost/grafana` · API `localhost/api` · Collector `localhost/logs`
+**Endpoints:**
+
+| Service | URL |
+|---------|-----|
+| Grafana | http://localhost/grafana |
+| API | http://localhost/api |
+| Collector | http://localhost/logs |
 
 ### Monitor
 ```bash
