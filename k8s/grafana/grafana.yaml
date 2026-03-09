@@ -1,5 +1,5 @@
 ---
-apiVersion: apps/v1
+apiVersion: apps/v1       
 kind: Deployment
 metadata:
   name: grafana
@@ -16,14 +16,12 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana:10.4.0
+          image: log-system-grafana:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 3000
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
-            - name: GF_INSTALL_PLUGINS
-              value: grafana-clickhouse-datasource
               value: admin
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "true"

@@ -28,6 +28,8 @@ docker build -t log-system-collector:latest        ./collector
 docker build -t log-system-processor:latest        ./processor
 docker build -t log-system-api:latest              ./api
 docker build -t log-system-anomaly_detector:latest ./anomaly_detector
+# Grafana with ClickHouse plugin baked in — avoids runtime internet download
+docker build -t log-system-grafana:latest          ./grafana
 echo "✓ Images built"
 
 # ── 2. Load local images into Kind ──
@@ -37,7 +39,8 @@ for IMAGE in \
   "log-system-collector:latest" \
   "log-system-processor:latest" \
   "log-system-api:latest" \
-  "log-system-anomaly_detector:latest"
+  "log-system-anomaly_detector:latest" \
+  "log-system-grafana:latest"
 do
   echo "  Loading $IMAGE..."
   kind load docker-image $IMAGE --name $CLUSTER
@@ -55,7 +58,6 @@ THIRD_PARTY_IMAGES=(
   "clickhouse/clickhouse-server:23.8"
   "redis:7-alpine"
   "busybox:1.36"
-  "grafana/grafana:10.4.0"
   "registry.k8s.io/ingress-nginx/controller:v1.10.0"
   "registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0"
 )
@@ -142,9 +144,9 @@ kubectl get pods -n $NAMESPACE
 
 echo ""
 echo "🌐 Access your services:"
-echo "   Grafana   : http://localhost/grafana   (admin/admin)"
+echo "   Grafana   : http://localhost:3000/grafana (port-forward) — run start.sh"
 echo "   API       : http://localhost/api/health"
-echo "   Collector : http://localhost/logs/health"
+echo "   Collector : POST http://localhost/logs"
 echo ""
 echo "💡 To watch pods come up:"
 echo "   kubectl get pods -n log-system -w"

@@ -77,19 +77,28 @@ The detector runs every 60 seconds, extracts 7 features per service (error count
 
 **Simulation test results (6 scenarios, 100% detection rate):**
 
-| Scenario | Detected | Cycles to Detect |
-|----------|----------|-----------------|
-| Error Spike | ✅ | 1 |
-| Service Silence | ✅ | 2 |
-| Error Ratio Explosion | ✅ | 1 |
-| Volume Storm | ✅ | 1 |
-| Slow Degradation | ✅ | 5 |
-| Cascading Failure | ✅ | 1 |
+| Scenario | Detected | Cycles to Detect | Avg Confidence | Max Confidence |
+|----------|----------|-----------------|----------------|----------------|
+| Error Spike | ✅ | 2 | 50.6% | 96.5% |
+| Service Silence | ✅ | 2 | 62.0% | 100% |
+| Error Ratio Explosion | ✅ | 2 | 100% | 100% |
+| Volume Storm | ✅ | 1 | 100% | 100% |
+| Slow Degradation | ✅ | 5 | 100% | 100% |
+| Cascading Failure | ✅ | 1 | 87.2% | 100% |
 
 ```bash
 # Run simulation tests
 python scripts/simulation_tests.py
 ```
+
+### Grafana Dashboard
+
+![Grafana Dashboard](test_results/dash.png)
+
+The dashboard provides real-time visibility into:
+- Log volume by service and severity
+- Error rates and anomaly detection alerts
+- System health metrics across all services
 
 ---
 

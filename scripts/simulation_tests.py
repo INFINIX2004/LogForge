@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 # ─────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────
-COLLECTOR_URL  = "http://localhost:8080/logs"
-API_URL        = "http://localhost:8000/api"
+COLLECTOR_URL  = "http://localhost/logs"
+API_URL        = "http://localhost/api"
 REPORT_DIR     = "./test_results"
 
 CYCLE_DELAY    = 6      # seconds per cycle (slightly more than detector's 5s)

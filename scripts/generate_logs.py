@@ -2,7 +2,7 @@ import requests
 import random
 import time
 
-COLLECTOR_URL = "http://localhost:8080/logs"
+COLLECTOR_URL = "http://localhost/logs"
 
 # ─────────────────────────────────────────────
 # SERVICE PROFILES  (normal behaviour)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     print("""
 ╔══════════════════════════════════════════════════╗
   Log Generator — Anomaly Detection Test Suite
-  Collector  : http://localhost:8080/logs
+  Collector  : http://localhost/logs
   Dashboard  : http://localhost:3000
 ╚══════════════════════════════════════════════════╝
 
